@@ -5,7 +5,7 @@ Equivalent of Pizza.py data.py in Go.
 ## Installation
 
 1. lmpsdat requires `go >1.15` in order to work.
-2. `go get github.com/ortiye/lmpsdat`.
+2. `go get github.com/Ortiye/lmpsdat`.
 3. Implement lmpsdat in your code.
 
 ## Documentation
