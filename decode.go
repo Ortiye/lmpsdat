@@ -35,7 +35,7 @@ func (dec *Decoder) Decode(v interface{}) error {
 		return fmt.Errorf("interface passed is not a pointer of a struct")
 	}
 
-	keys, nFields := createNames(typ)
+	nFields, keys := createNames(typ)
 	kHead, kBody := headBody(keys)
 
 	inHeader := true

@@ -166,7 +166,7 @@ func (m *Masses) Check() error {
 }
 
 // SetKeysVal assigns to the NameAtomTypes Key the number of types based on the
-// length of the map that is created with the Set or Decode methods.
+// length of the map that is created via the Set or Decode methods.
 //
 // This method needs a Key in order to work. This Key is an instance of Header
 // with Name equal to NameAtomTypes. Use the Set method to assign this Key.

@@ -221,7 +221,7 @@ func (l *Links) Check() error {
 }
 
 // SetKeysVal assigns to the NamexxxNbr Key the number of bonds, dihedrals,
-// angle, etc. based on the length of the map that is created with the Set or
+// angle, etc. based on the length of the map that is created via the Set or
 // Decode methods.
 //
 // This method needs a Key in order to work. This Key is an instance of Header

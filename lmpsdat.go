@@ -4,13 +4,18 @@ import (
 	"bufio"
 	"fmt"
 	"reflect"
+	"strings"
 
 	"github.com/ortiye/lmpsdat/key"
 )
 
-// createNames returns a map that links the Names to the corresponding Keys and
-// another map that links the Names to the field identifiers of a structure.
-func createNames(typ reflect.Type) (map[key.Name]key.Key, map[key.Name]int) {
+// createNames returns a map that links the Names to the field identifiers of a
+// structure and a map that links the Names to the corresponding Keys.
+// lmpsdat:"Atoms" must include the Atom Style. For instance, it should be
+// lmpsdat:"Atoms, full". If the Atom Style is not specified or does not exist,
+// the Atom Style "full" will be used.
+func createNames(typ reflect.Type) (map[key.Name]int, map[key.Name]key.Key) {
+	atomStyle := key.AtomStyleFull
 	names := make([]key.Name, 0)
 	namesFields := make(map[key.Name]int, 0)
 	for i := 0; i < typ.NumField(); i++ {
@@ -19,13 +24,22 @@ func createNames(typ reflect.Type) (map[key.Name]key.Key, map[key.Name]int) {
 		if !ok {
 			continue
 		}
+		if strings.HasPrefix(v, string(key.NameAtoms)) { // case where lmpsdat:"Atoms, ..."
+			idx := strings.IndexRune(v, ',')
+			if idx >= 0 && idx <= len(v) {
+				as := strings.TrimSpace(v[idx+1:])
+				if key.IsAtomStyle(as) {
+					atomStyle = key.NewAtomStyle(as)
+				}
+			}
+		}
 		n := key.Name(v)
 		if key.IsName(n) {
 			namesFields[n] = i
 			names = append(names, n)
 		}
 	}
-	return key.MakeKeys(names), namesFields
+	return namesFields, key.MakeKeys(names, atomStyle)
 }
 
 // headBody separate the keys. It reproduces what the LAMMPS data parser does.
@@ -42,6 +56,8 @@ func headBody(keys map[key.Name]key.Key) (headers, bodies map[key.Name]key.Key) 
 	return
 }
 
+// keyDecode calls the Keyword method for several Keys. If a Keyword returns
+// true, the Decode method will be called and this function will return true.
 func keyDecode(s []byte, keys map[key.Name]key.Key, r *bufio.Scanner) (bool, error) {
 	for n, k := range keys {
 		if k.Keyword(s) {

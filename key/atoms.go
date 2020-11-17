@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"fmt"
 	"io"
-	"strconv"
 	"strings"
 )
 
@@ -39,11 +38,18 @@ type Atom struct {
 // and NZ are set). More information about the structure of this table can be
 // found in the LAMMPS documentation.
 //
-// Atoms can be instanced by using the built-in new function.
+// Atoms can be instanced by using the NewAtoms function.
 type Atoms struct {
+	atomStyle AtomStyle
 	atomsNbr  *Header
 	atomTypes *Header
 	v         map[int]*Atom
+}
+
+// NewAtoms returns an instance of Atoms with a specific atom style. It panics
+// if the Atom Style does not exist.
+func NewAtoms(as AtomStyle) *Atoms {
+	return &Atoms{atomStyle: as}
 }
 
 // Name returns NameAtoms. It corresponds to the header of the table.
@@ -96,9 +102,14 @@ func (a *Atoms) Encode(w io.Writer) error {
 		var err error
 		var v = a.v[k]
 
-		_, err = fmt.Fprintf(w, "%d %d %d %g %g %g %g", k, v.MolTag, v.AtomType, v.Q, v.X, v.Y, v.Z)
+		_, err = fmt.Fprintf(w, "%d ", k)
 		if err != nil {
-			return fmt.Errorf("fmt.Fprintf: %w", err)
+			return fmt.Errorf("fmt.Fprintf id: %w", err)
+		}
+
+		err = a.atomStyle.Encode(v, w)
+		if err != nil {
+			return fmt.Errorf("a.atomStyle.Encode named %s: %w", a.atomStyle.Name(), err)
 		}
 
 		if v.N {
@@ -143,63 +154,15 @@ func (a *Atoms) Decode(s []byte, r *bufio.Scanner) error {
 	for i := 0; i < atomsNbr && r.Scan(); i++ {
 		s := delComments(r.Bytes())
 		f := strings.Fields(string(s))
-		if err := a.decode(f); err != nil {
+		id, atom, err := a.atomStyle.Decode(f)
+		if err != nil {
 			return err
 		}
+		a.v[id] = atom
 	}
 	if r.Err() != nil {
 		return fmt.Errorf("r.Scan: %w", r.Err())
 	}
-	return nil
-}
-
-// decode converts each column into a number (float64 or int).
-func (a *Atoms) decode(f []string) error {
-	if len(f) < 7 {
-		return fmt.Errorf("not enough fields = %d, want >= 7", len(f))
-	}
-
-	var atom Atom
-	var id int
-	var err error
-
-	if id, err = strconv.Atoi(f[0]); err != nil {
-		return fmt.Errorf("strconv.Atoi id: %w", err)
-	}
-
-	if atom.MolTag, err = strconv.Atoi(f[1]); err != nil {
-		return fmt.Errorf("strconv.Atoi MolTag: %w", err)
-	}
-	if atom.AtomType, err = strconv.Atoi(f[2]); err != nil {
-		return fmt.Errorf("strconv.Atoi AtomType: %w", err)
-	}
-	if atom.Q, err = strconv.ParseFloat(f[3], 64); err != nil {
-		return fmt.Errorf("strconv.ParseFloat Q: %w", err)
-	}
-	if atom.X, err = strconv.ParseFloat(f[4], 64); err != nil {
-		return fmt.Errorf("strconv.ParseFloat X: %w", err)
-	}
-	if atom.Y, err = strconv.ParseFloat(f[5], 64); err != nil {
-		return fmt.Errorf("strconv.ParseFloat Y: %w", err)
-	}
-	if atom.Z, err = strconv.ParseFloat(f[6], 64); err != nil {
-		return fmt.Errorf("strconv.ParseFloat Z: %w", err)
-	}
-
-	atom.N = false
-	if len(f) == 10 {
-		atom.N = true
-		if atom.NX, err = strconv.Atoi(f[7]); err != nil {
-			return fmt.Errorf("strconv.Atoi NX: %w", err)
-		}
-		if atom.NY, err = strconv.Atoi(f[8]); err != nil {
-			return fmt.Errorf("strconv.Atoi NY: %w", err)
-		}
-		if atom.NZ, err = strconv.Atoi(f[9]); err != nil {
-			return fmt.Errorf("strconv.Atoi NZ: %w", err)
-		}
-	}
-	a.v[id] = &atom
 	return nil
 }
 
@@ -268,7 +231,7 @@ func (a *Atoms) Check() error {
 }
 
 // SetKeysVal assigns to the NameAtomsNbr Key the number of atoms based on the
-// length of the map that is created with the Set or Decode methods.
+// length of the map that is created via the Set or Decode methods.
 //
 // This method needs a Key in order to work. This Key is an instance of Header
 // with Name equal to NameAtomsNbr. Use the Set method to assign this Key.

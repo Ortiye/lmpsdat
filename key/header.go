@@ -104,7 +104,7 @@ func (h *Header) Check() error {
 	return nil
 }
 
-// SetKeysVal returns ErrUnsupported as it is unsupported by Box.
+// SetKeysVal returns ErrUnsupported as it is unsupported by Header.
 func (h *Header) SetKeysVal() error {
 	return ErrUnsupported
 }

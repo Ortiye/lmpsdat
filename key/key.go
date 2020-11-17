@@ -50,10 +50,10 @@ type Key interface {
 	// methods verifies if the masses are not lower than zero.
 	Check() error
 
-	// SetKeysVal assigns a value to the Keys set via the SetKeys method. For
-	// instance, for the Atoms Key, it will assign the number of atoms to the
-	// Header Key based on number of values. It should be used after calling the
-	// Set method.
+	// SetKeysVal calls the Set method for the Keys that were set via the
+	// SetKeys method. For instance, for Masses, it will assign to the
+	// NameAtomTypes Key the number of atom types based on the length of the map
+	// that was created via the Set or Decode methods.
 	SetKeysVal() error
 }
 
@@ -171,8 +171,8 @@ func sortIntsMap(m interface{}) (keys []int) {
 	return
 }
 
-// keywordHeader tests whether the byte slice s begins with prefix aftet
-// trimming the spaces.
+// keywordHeader tests whether the byte slice s begins with prefix after
+// trimming the spaces and after a number.
 func keywordHeader(s []byte, prefix [][]byte) bool {
 	if len(prefix) == 0 {
 		return false

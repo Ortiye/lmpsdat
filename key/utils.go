@@ -21,21 +21,46 @@ func IsName(name Name) bool {
 	return false
 }
 
-type makeKeys map[Name]Key
+// IsAtomStyle returns true if an Atom Style exists and is supported by this
+// package.
+func IsAtomStyle(as string) bool {
+	for _, s := range ListAtomStyles {
+		if s.Name() == as {
+			return true
+		}
+	}
+	return false
+}
+
+// NewAtomStyle returns the corresponding atom style. If the atom style does not
+// exists, this function returns nil.
+func NewAtomStyle(as string) AtomStyle {
+	for _, s := range ListAtomStyles {
+		if s.Name() == as {
+			return s
+		}
+	}
+	return nil
+}
+
+type makeKeys struct {
+	k  map[Name]Key
+	as AtomStyle
+}
 
 // MakeKeys returns the Keys instanced with a list of given Names. It may return
 // more Keys than expected: it includes the Keys that are required by other
 // Keys.
-func MakeKeys(names []Name) map[Name]Key {
-	m := make(makeKeys, len(names))
+func MakeKeys(names []Name, as AtomStyle) map[Name]Key {
+	m := makeKeys{make(map[Name]Key, len(names)), as}
 	for _, n := range names {
 		m.New(n)
 	}
-	return m
+	return m.k
 }
 
-func (m makeKeys) New(name Name) Key {
-	if v, ok := m[name]; ok {
+func (m *makeKeys) New(name Name) Key {
+	if v, ok := m.k[name]; ok {
 		return v
 	}
 
@@ -66,7 +91,7 @@ func (m makeKeys) New(name Name) Key {
 		v.SetKeys(m.New(NameAtomTypes))
 
 	case NameAtoms:
-		v = new(Atoms)
+		v = NewAtoms(m.as)
 		v.SetKeys(m.New(NameAtomTypes),
 			m.New(NameAtomsNbr))
 
@@ -93,6 +118,6 @@ func (m makeKeys) New(name Name) Key {
 		panic("Name provided is not implemented in this function")
 	}
 
-	m[name] = v
+	m.k[name] = v
 	return v
 }

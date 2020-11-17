@@ -34,7 +34,7 @@ func (enc *Encoder) Encode(v interface{}) error {
 		return fmt.Errorf("interface passed is not a pointer of a struct")
 	}
 
-	keys, nFields := createNames(typ)
+	nFields, keys := createNames(typ)
 
 	for n, f := range nFields {
 		field := val.Field(f).Interface()

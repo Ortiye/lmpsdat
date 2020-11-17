@@ -184,7 +184,7 @@ func (c *Coeffs) Check() error {
 
 // SetKeysVal assigns to the NamexxxTypes (where xxx can be Atom, Angle, Bond,
 // etc.) Key the number of types based on the length of the map that is created
-// with the Set or Decode methods.
+// via the Set or Decode methods.
 //
 // This method needs a Key in order to work. This Key is an instance of Header
 // with Name equal to NamesxxTypes where xxx can be Atom, Angle, Bond, etc. Use
