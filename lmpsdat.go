@@ -3,6 +3,7 @@ package lmpsdat
 import (
 	"bufio"
 	"fmt"
+	"os"
 	"reflect"
 	"strings"
 
@@ -30,6 +31,8 @@ func createNames(typ reflect.Type) (map[key.Name]int, map[key.Name]key.Key) {
 				as := strings.TrimSpace(v[idx+1:])
 				if key.IsAtomStyle(as) {
 					atomStyle = key.NewAtomStyle(as)
+				} else {
+					fmt.Fprintf(os.Stderr, "WARNING: atom style = %s is not supported", as)
 				}
 				v = strings.TrimSpace(v[:idx])
 			}
@@ -38,6 +41,8 @@ func createNames(typ reflect.Type) (map[key.Name]int, map[key.Name]key.Key) {
 		if key.IsName(n) {
 			namesFields[n] = i
 			names = append(names, n)
+		} else {
+			fmt.Fprintf(os.Stderr, "WARNING: name = %s is not supported", v)
 		}
 	}
 	return namesFields, key.MakeKeys(names, atomStyle)

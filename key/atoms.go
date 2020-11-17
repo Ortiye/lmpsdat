@@ -217,9 +217,9 @@ func (a *Atoms) Check() error {
 		if typ < 1 || typ > atomsNbr {
 			return fmt.Errorf("identifier = %d is invalid: it must be greater than zero and lower or equal than the number of atoms = %d", typ, atomsNbr)
 		}
-		if atom.MolTag < 1 {
-			return fmt.Errorf("molecule tag is lower than one for atom %d", typ)
-		}
+		//if atom.MolTag < 1 {
+		//	return fmt.Errorf("molecule tag is lower than one for atom %d", typ)
+		//}
 		if atom.AtomType < 1 || atom.AtomType > atomsTypes {
 			return fmt.Errorf("type = %d is invalid: it must be greater than zero and lower or equal than the number of types = %d", atom.AtomType, atomsTypes)
 		}
