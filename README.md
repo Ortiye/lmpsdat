@@ -10,7 +10,7 @@ Equivalent of Pizza.py data.py in Go.
 
 ## Documentation
 
-The documentation is available here : https://pkg.go.dev/github.com/Ortiye/lmpsdat.
+The documentation is available here: https://pkg.go.dev/github.com/Ortiye/lmpsdat.
 
 ## Examples
 
