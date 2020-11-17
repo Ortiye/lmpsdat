@@ -31,7 +31,7 @@ func createNames(typ reflect.Type) (map[key.Name]int, map[key.Name]key.Key) {
 				if key.IsAtomStyle(as) {
 					atomStyle = key.NewAtomStyle(as)
 				}
-				v = v[:idx]
+				v = strings.TrimSpace(v[:idx])
 			}
 		}
 		n := key.Name(v)
